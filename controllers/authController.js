@@ -36,7 +36,7 @@ const seedUsers = async (req, res) => {
     const usersToSeed = [
       { name: 'Admin User', email: 'admin@example.com', password: 'password123', role: 'admin' },
       { name: 'Sales Man01', email: 'sale01@leadbase.com', password: '123user1', role: 'salesperson' },
-      { name: 'Sales Man02', email: 'sale@leadbase.com', password: '123user2', role: 'salesperson' }
+      { name: 'Sales Man02', email: 'sale02@leadbase.com', password: '123user2', role: 'salesperson' }
     ];
 
     const results = [];
@@ -66,16 +66,4 @@ const seedUsers = async (req, res) => {
   }
 };
 
-const getUsers = async (req, res) => {
-  try {
-    const users = await prisma.user.findMany({
-      select: { id: true, name: true, role: true }
-    });
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error fetching users' });
-  }
-};
-
-module.exports = { loginUser, seedUsers, getUsers };
+module.exports = { loginUser, seedUsers };
