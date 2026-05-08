@@ -31,29 +31,51 @@ const loginUser = async (req, res) => {
   }
 };
 
-const seedAdmin = async (req, res) => {
+const seedUsers = async (req, res) => {
   try {
-    const adminExists = await prisma.user.findUnique({ where: { email: 'admin@example.com' } });
-    if (adminExists) {
-      return res.json({ message: 'Admin already exists', user: adminExists });
+    const usersToSeed = [
+      { name: 'Admin User', email: 'admin@example.com', password: 'password123', role: 'admin' },
+      { name: 'Sales Man01', email: 'sale01@leadbase.com', password: '123user1', role: 'salesperson' },
+      { name: 'Sales Man02', email: 'sale@leadbase.com', password: '123user2', role: 'salesperson' }
+    ];
+
+    const results = [];
+    for (const u of usersToSeed) {
+      const exists = await prisma.user.findUnique({ where: { email: u.email } });
+      if (!exists) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(u.password, salt);
+        const user = await prisma.user.create({
+          data: {
+            name: u.name,
+            email: u.email,
+            password: hashedPassword,
+            role: u.role,
+          },
+        });
+        results.push({ email: user.email, status: 'Created' });
+      } else {
+        results.push({ email: exists.email, status: 'Already exists' });
+      }
     }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('password123', salt);
-
-    const admin = await prisma.user.create({
-      data: {
-        name: 'Admin User',
-        email: 'admin@example.com',
-        password: hashedPassword,
-        role: 'admin',
-      },
-    });
-    res.status(201).json({ message: 'Admin created successfully', user: { id: admin.id, email: admin.email } });
+    
+    res.status(201).json({ message: 'Seeding completed', results });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error seeding admin' });
+    res.status(500).json({ message: 'Server error seeding users' });
   }
 };
 
-module.exports = { loginUser, seedAdmin };
+const getUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, role: true }
+    });
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error fetching users' });
+  }
+};
+
+module.exports = { loginUser, seedUsers, getUsers };

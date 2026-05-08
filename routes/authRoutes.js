@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { loginUser, seedAdmin } = require('../controllers/authController');
+const { loginUser, seedUsers, getUsers } = require('../controllers/authController');
+const { protect } = require('../middleware/authMiddleware');
 
 router.post('/login', loginUser);
-router.post('/seed', seedAdmin);
+router.post('/seed', seedUsers);
+router.get('/users', protect, getUsers);
 
 module.exports = router;
