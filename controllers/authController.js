@@ -66,4 +66,16 @@ const seedUsers = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, seedUsers };
+const getUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, role: true }
+    });
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error fetching users' });
+  }
+};
+
+module.exports = { loginUser, seedUsers, getUsers };
